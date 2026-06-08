@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>InterviewX ⚡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --h:210;
+  --accent:hsl(var(--h),88%,62%);
+  --accent-soft:hsl(var(--h),80%,74%);
+  --accent-glow:hsla(var(--h),90%,62%,0.38);
+  --bg:#020509;
+  --glass:rgba(255,255,255,0.055);
+  --glass-b:rgba(255,255,255,0.10);
+  --glass-hov:rgba(255,255,255,0.09);
+  --inner:rgba(255,255,255,0.038);
+  --inner-b:rgba(255,255,255,0.07);
+  --text:#eef2ff;
+  --text-muted:rgba(180,195,255,0.55);
+  --text-dim:rgba(150,165,220,0.35);
+  --success:rgba(74,222,128,1);
+  --error:rgba(248,113,113,1);
+}
+body.light{
+  --bg:#f0f4ff;
+  --glass:rgba(255,255,255,0.62);
+  --glass-b:rgba(160,180,240,0.28);
+  --glass-hov:rgba(255,255,255,0.82);
+  --inner:rgba(255,255,255,0.48);
+  --inner-b:rgba(140,160,220,0.22);
+  --text:#0e1529;
+  --text-muted:rgba(60,75,130,0.65);
+  --text-dim:rgba(90,110,180,0.40);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .4s,color .4s;}
+
+/* ═══ MESH BACKGROUND ═══ */
+#mesh{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);animation:orbFloat 22s ease-in-out infinite;}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(3%,4%) scale(1.05);}66%{transform:translate(-4%,2%) scale(0.96);}}
+
+/* ═══ GLASS SYSTEM ═══ */
+.glass{background:var(--glass);border:1px solid var(--glass-b);border-radius:24px;backdrop-filter:blur(32px) saturate(180%);-webkit-backdrop-filter:blur(32px) saturate(180%);}
+.glass-inner{background:var(--inner);border:1px solid var(--inner-b);border-radius:16px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
+.glass-sm{background:var(--glass);border:1px solid var(--glass-b);border-radius:16px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+
+/* ═══ BUTTONS ═══ */
+.btn-glow{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 36px;font-size:15px;font-family:'Syne',sans-serif;font-weight:600;letter-spacing:.04em;border:none;border-radius:50px;cursor:pointer;color:#fff;background:linear-gradient(135deg,hsl(var(--h),84%,58%),hsl(calc(var(--h)+35),78%,66%));box-shadow:0 0 32px var(--accent-glow),0 4px 18px rgba(0,0,0,.28);transition:transform .2s,box-shadow .2s,opacity .2s;position:relative;overflow:hidden;}
+.btn-glow::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);border-radius:inherit;}
+.btn-glow:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 0 52px var(--accent-glow),0 8px 30px rgba(0,0,0,.35);}
+.btn-glow:active{transform:scale(0.97);}
+.btn-glow:disabled{opacity:.38;pointer-events:none;}
+.btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:11px 22px;font-size:14px;font-family:'DM Sans',sans-serif;border:1px solid var(--glass-b);border-radius:50px;background:var(--glass);color:var(--text);cursor:pointer;backdrop-filter:blur(14px);transition:background .2s,transform .15s;}
+.btn-ghost:hover{background:var(--glass-hov);transform:translateY(-1px);}
+.btn-ghost:disabled{opacity:.4;pointer-events:none;}
+
+/* ═══ NAVBAR ═══ */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:200;padding:12px 20px;}
+.nav-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-radius:99px;}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:-.02em;cursor:pointer;background:linear-gradient(120deg,hsl(var(--h),84%,72%),hsl(calc(var(--h)+45),78%,78%));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nav-links{display:flex;gap:4px;align-items:center;}
+.nav-link{padding:7px 16px;border-radius:99px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted);transition:color .2s,background .2s;border:none;background:transparent;font-family:'DM Sans',sans-serif;}
+.nav-link:hover{color:var(--text);}
+.nav-link.active{color:var(--accent-soft);background:hsla(var(--h),90%,62%,.12);}
+.nav-actions{display:flex;gap:8px;align-items:center;}
+.color-popup{position:absolute;top:72px;right:20px;width:240px;padding:20px;z-index:300;display:none;}
+.color-popup.open{display:block;animation:slideDown .3s cubic-bezier(.22,1,.36,1) both;}
+.hue-track{background:linear-gradient(to right,hsl(0,80%,60%),hsl(60,80%,60%),hsl(120,80%,60%),hsl(180,80%,60%),hsl(240,80%,60%),hsl(300,80%,60%),hsl(360,80%,60%));border-radius:99px;padding:4px 0;}
+input[type=range].hue-slider{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;outline:none;cursor:pointer;}
+input[type=range].hue-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:white;box-shadow:0 2px 10px rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.9);}
+
+/* ═══ PAGES ═══ */
+.page{display:none;min-height:100vh;position:relative;z-index:1;}
+.page.active{display:block;}
+
+/* ═══ KEYFRAMES ═══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(32px);}to{opacity:1;transform:translateY(0);}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.88);}to{opacity:1;transform:scale(1);}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes scoreReveal{from{opacity:0;transform:scale(0.3) rotate(-15deg);}to{opacity:1;transform:scale(1) rotate(0);}}
+@keyframes glowPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+@keyframes feedbackIn{from{opacity:0;transform:translateY(20px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+.au1{animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both;}
+.au2{animation:fadeUp .6s cubic-bezier(.22,1,.36,1) .1s both;}
+.au3{animation:fadeUp .6s cubic-bezier(.22,1,.36,1) .2s both;}
+.au4{animation:fadeUp .6s cubic-bezier(.22,1,.36,1) .32s both;}
+.au5{animation:fadeUp .6s cubic-bezier(.22,1,.36,1) .45s both;}
+.as1{animation:scaleIn .5s cubic-bezier(.22,1,.36,1) both;}
+.as2{animation:scaleIn .5s cubic-bezier(.22,1,.36,1) .14s both;}
+
+/* ═══ CHIP ═══ */
+.chip{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:99px;font-size:12px;font-weight:600;letter-spacing:.05em;background:hsla(var(--h),90%,62%,.12);color:var(--accent-soft);border:1px solid hsla(var(--h),90%,62%,.22);}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--accent-soft);animation:glowPulse 2s ease-in-out infinite;}
+
+/* ═══ PROGRESS ═══ */
+.prog-track{background:var(--glass-b);border-radius:99px;height:5px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,hsl(var(--h),84%,58%),hsl(calc(var(--h)+40),78%,70%));box-shadow:0 0 12px var(--accent-glow);transition:width .7s cubic-bezier(.22,1,.36,1);}
+
+/* ═══ CONTAINERS ═══ */
+.container{max-width:800px;margin:0 auto;padding:112px 20px 80px;}
+.container-center{max-width:800px;margin:0 auto;padding:112px 20px 80px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;}
+
+/* ═══ HOME ═══ */
+#page-home h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(60px,12vw,116px);line-height:.88;letter-spacing:-.04em;margin-bottom:30px;}
+.grad-text{background:linear-gradient(135deg,var(--text) 0%,hsl(var(--h),84%,74%) 55%,hsl(calc(var(--h)+50),78%,78%) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.grad-text-accent{background:linear-gradient(135deg,hsl(var(--h),84%,68%),hsl(calc(var(--h)+55),78%,76%));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-grid{display:flex;gap:14px;justify-content:center;margin-top:72px;flex-wrap:wrap;}
+.stat-card{padding:24px 32px;text-align:center;border-radius:22px;min-width:128px;}
+.stat-num{font-family:'Syne',sans-serif;font-weight:800;font-size:36px;background:linear-gradient(135deg,hsl(var(--h),84%,72%),hsl(calc(var(--h)+40),78%,78%));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:6px;}
+
+/* ═══ ABOUT ═══ */
+.step-card{padding:24px 28px;border-radius:20px;display:flex;align-items:flex-start;gap:18px;margin-bottom:12px;transition:transform .2s,background .2s;}
+.step-card:hover{transform:translateX(4px);background:var(--glass-hov);}
+.step-icon{width:54px;height:54px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px;background:hsla(var(--h),90%,62%,.10);border:1px solid hsla(var(--h),90%,62%,.18);}
+.step-num{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--accent-soft);margin-bottom:5px;text-transform:uppercase;}
+.step-title{font-weight:600;font-size:16px;margin-bottom:6px;}
+.step-desc{font-size:14px;line-height:1.68;color:var(--text-muted);}
+
+/* ═══ UPLOAD ═══ */
+.upload-box{max-width:560px;width:100%;}
+.drop-zone{border:2px dashed var(--glass-b);border-radius:20px;padding:60px 32px;text-align:center;cursor:pointer;transition:border-color .25s,background .25s,transform .2s;position:relative;}
+.drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:hsla(var(--h),90%,62%,.07);transform:scale(1.01);}
+#file-input{display:none;}
+.error-banner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:14px;padding:14px 18px;font-size:14px;color:#f87171;display:none;margin-top:14px;}
+#upload-progress{display:none;margin-top:18px;}
+
+/* ═══ INTERVIEW ═══ */
+.q-card{padding:32px 34px;border-radius:24px;margin-bottom:20px;}
+.q-num-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--accent-soft);margin-bottom:14px;text-transform:uppercase;}
+.q-text{font-family:'Syne',sans-serif;font-size:clamp(18px,3vw,24px);font-weight:700;line-height:1.38;letter-spacing:-.01em;}
+.answer-area{padding:24px;border-radius:22px;margin-bottom:18px;}
+.answer-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;}
+textarea#answer-input{width:100%;min-height:170px;background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.75;padding:16px 18px;resize:vertical;outline:none;}
+textarea#answer-input::placeholder{color:var(--text-dim);}
+textarea#answer-input:disabled{opacity:.55;cursor:not-allowed;}
+.textarea-wrapper{background:var(--inner);border:1px solid var(--inner-b);border-radius:14px;transition:border-color .2s,box-shadow .2s;}
+.textarea-wrapper:focus-within{border-color:hsla(var(--h),80%,65%,.6);box-shadow:0 0 0 3px hsla(var(--h),90%,62%,.12);}
+
+/* ═══ FEEDBACK BOX ═══ */
+.feedback-box{padding:28px;border-radius:22px;margin-bottom:24px;border:1px solid hsla(var(--h),70%,62%,.22);animation:feedbackIn .5s cubic-bezier(.22,1,.36,1) both;}
+.feedback-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
+.feedback-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;}
+.score-badge{padding:6px 16px;border-radius:99px;font-family:'Syne',sans-serif;font-weight:800;font-size:18px;background:linear-gradient(135deg,hsl(var(--h),84%,58%),hsl(calc(var(--h)+35),78%,66%));color:#fff;box-shadow:0 0 20px var(--accent-glow);}
+.fb-section{padding:14px 18px;border-radius:13px;margin-bottom:9px;}
+.fb-section-label{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px;}
+.fb-section-body{font-size:14px;line-height:1.7;color:var(--text);white-space:pre-wrap;}
+
+/* ═══ RESULTS PAGE ═══ */
+.results-hero{padding:56px 38px;text-align:center;border-radius:32px;margin-bottom:28px;position:relative;overflow:hidden;}
+.results-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 70%,hsla(var(--h),90%,62%,.10),transparent 68%);pointer-events:none;}
+.overall-score{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(82px,14vw,130px);line-height:1;letter-spacing:-.04em;animation:scoreReveal .9s cubic-bezier(.22,1,.36,1) .2s both;background:linear-gradient(135deg,hsl(var(--h),84%,72%),hsl(calc(var(--h)+50),78%,78%));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 44px hsla(var(--h),90%,62%,.45));}
+.overall-denom{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;opacity:.8;letter-spacing:-.02em;}
+.grade-label{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.01em;margin-top:14px;}
+.mini-bars{display:flex;gap:7px;justify-content:center;align-items:flex-end;height:48px;margin-top:30px;}
+.mini-bar{width:24px;border-radius:5px 5px 0 0;transition:height .6s cubic-bezier(.22,1,.36,1);}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
+.stat-mini-card{padding:22px 16px;text-align:center;border-radius:20px;}
+.stat-mini-icon{font-size:22px;margin-bottom:9px;}
+.stat-mini-val{font-family:'Syne',sans-serif;font-weight:800;font-size:30px;background:linear-gradient(135deg,hsl(var(--h),84%,72%),hsl(calc(var(--h)+40),78%,78%));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-mini-label{font-size:11px;color:var(--text-muted);margin-top:4px;}
+
+/* ═══ ACCORDION ═══ */
+.accordion-item{border-radius:20px;margin-bottom:10px;overflow:hidden;transition:box-shadow .2s;}
+.accordion-item:hover{box-shadow:0 4px 24px rgba(0,0,0,.15);}
+.accordion-head{width:100%;background:none;border:none;cursor:pointer;padding:18px 22px;display:flex;align-items:center;gap:14px;text-align:left;color:var(--text);font-family:'DM Sans',sans-serif;}
+.accordion-head:hover{background:var(--glass-hov);}
+.accordion-q-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--accent-soft);min-width:32px;}
+.accordion-meta{flex:1;min-width:0;}
+.accordion-q{font-weight:600;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.accordion-a-preview{font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.accordion-score{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--accent-soft);margin-right:8px;flex-shrink:0;}
+.accordion-chevron{color:var(--text-muted);transition:transform .3s;flex-shrink:0;font-size:16px;}
+.accordion-chevron.open{transform:rotate(180deg);}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.22,1,.36,1),opacity .35s ease;opacity:0;padding:0 22px;}
+.accordion-body.open{max-height:1000px;opacity:1;padding:2px 22px 20px;}
+.acc-detail{padding:14px 18px;border-radius:13px;margin-bottom:10px;}
+.acc-detail-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px;}
+.acc-detail-body{font-size:14px;line-height:1.7;white-space:pre-wrap;}
+
+/* ═══ SPINNER ═══ */
+.spinner{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(255,255,255,.22);border-top-color:white;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;}
+
+/* ═══ TOAST ═══ */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:999;padding:13px 26px;border-radius:50px;font-size:14px;font-weight:500;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(22px);}
+#toast.show{opacity:1;}
+#toast.error{border-color:rgba(239,68,68,.4);color:#f87171;}
+#toast.success{border-color:rgba(74,222,128,.4);color:#4ade80;}
+#toast.info{border-color:hsla(var(--h),70%,62%,.4);color:var(--accent-soft);}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--glass-b);border-radius:99px;}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:620px){
+  .nav-links{display:none;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .stat-mini-card:last-child{grid-column:span 2;}
+  .container,.container-center{padding:100px 16px 70px;}
+}
+
+/* ═══ LOADING STATE ═══ */
+.skeleton{background:linear-gradient(90deg,var(--glass) 25%,var(--glass-hov) 50%,var(--glass) 75%);background-size:200% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:8px;}
+
+/* ═══ MODE BADGE ═══ */
+.mode-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(251,191,36,.10);color:rgba(251,191,36,.85);border:1px solid rgba(251,191,36,.25);}
+</style>
+</head>
+<body>
+
+<!-- ═══ MESH BACKGROUND ═══ -->
+<div id="mesh"></div>
+
+<!-- ═══ NAVBAR ═══ -->
+<div id="navbar">
+  <div class="nav-inner glass">
+    <span class="nav-link" onclick="goPage('home')"> INTERVIEWX ⚡</span>
+    <div class="nav-links">
+      <button class="nav-link active" id="nav-home"   onclick="navGo('home')">Home</button>
+      <button class="nav-link"        id="nav-about"  onclick="navGo('about')">About</button>
+      <button class="nav-link"        id="nav-upload" onclick="navGo('upload')">Upload</button>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-ghost" style="padding:8px 13px;font-size:15px;" onclick="toggleColorPicker()" title="Accent color">🎨</button>
+      <button class="btn-ghost" style="padding:8px 13px;font-size:15px;" onclick="toggleTheme()" id="theme-btn">🌙</button>
+    </div>
+  </div>
+  <div class="color-popup glass" id="color-popup">
+    <p style="font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px;">Accent Color</p>
+    <div class="hue-track">
+      <input type="range" class="hue-slider" id="hue-slider" min="0" max="360" value="210" oninput="setHue(this.value)">
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+      <span style="font-size:13px;color:var(--text-muted);">Hue: <span id="hue-val">210</span>°</span>
+      <div id="hue-preview" style="width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:hsl(210,84%,62%);transition:background .2s;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     PAGE: HOME
+═══════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="container" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;">
+    <div class="chip au1" style="margin-bottom:28px;"><span class="chip-dot"></span> AI-Powered Interview Simulator</div>
+    <h1 class="au2" style="font-family:'Syne',sans-serif;font-size:clamp(60px,6vw,160px);font-weight:800;line-height:1.05;letter-spacing:-.03em;"> InterviewX<br>
+    </h1>
+    <p class="au3" style="font-size:18px;line-height:1.7;color:var(--text-muted);max-width:480px;margin:0 auto 50px;">
+      Upload your resume. Answer 10 tailored AI questions.<br>Get instant scores, feedback, and a full performance report.
+    </p>
+    <div class="au4" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-glow" style="padding:16px 46px;font-size:16px;" onclick="navGo('upload')">Get Started →</button>
+      <button class="btn-ghost" style="padding:15px 30px;" onclick="navGo('about')">How it works</button>
+    </div>
+    <div class="stat-grid au5">
+      <div class="stat-card glass"><div class="stat-label">10</div><div class="stat-label">Questions / session</div></div>
+      <div class="stat-card glass"><div class="stat-label">AI</div><div class="stat-label">Instant feedback</div></div>
+      <div class="stat-card glass"><div class="stat-label">∞</div><div class="stat-label">Practice sessions</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     PAGE: ABOUT
+═══════════════════════════ -->
+<div class="page" id="page-about">
+  <div class="container">
+    <div class="au1" style="margin-bottom:48px;">
+      <div class="chip" style="margin-bottom:18px;">About</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:clamp(34px,6vw,60px);font-weight:800;line-height:1.05;letter-spacing:-.03em;">
+        How InterviewX actually works.<br>
+      </h2>
+    </div>
+    <div class="step-card glass au2">
+      <div class="step-icon">📄</div>
+      <div><div class="step-num">01</div><div class="step-title">Upload PDF Resume</div><div class="step-desc">Drop your resume in PDF format. Our parser extracts your experience, skills, and qualifications automatically using PyPDF2.</div></div>
+    </div>
+    <div class="step-card glass au3">
+      <div class="step-icon">🤖</div>
+      <div><div class="step-num">02</div><div class="step-title">AI Generates Questions</div><div class="step-desc">Google Gemini reads your profile and crafts 10 personalised interview questions tailored to your specific background and skills.</div></div>
+    </div>
+    <div class="step-card glass au3">
+      <div class="step-icon">✍️</div>
+      <div><div class="step-num">03</div><div class="step-title">Answer at Your Pace</div><div class="step-desc">No time limits. Read each question carefully and type your most considered answer. Navigate one question at a time.</div></div>
+    </div>
+    <div class="step-card glass au4">
+      <div class="step-icon">📊</div>
+      <div><div class="step-num">04</div><div class="step-title">Instant AI Evaluation</div><div class="step-desc">Each answer is scored out of 10 with detailed strengths, improvement areas, and model answer hints powered by Gemini AI.</div></div>
+    </div>
+    <div class="step-card glass au5">
+      <div class="step-icon">🏆</div>
+      <div><div class="step-num">05</div><div class="step-title">Full Performance Report</div><div class="step-desc">Review your overall score, statistics, and a complete breakdown of every question, your answers, and AI commentary.</div></div>
+    </div>
+    <div style="margin-top:44px;"><button class="btn-glow" onclick="navGo('upload')">Start My Interview →</button></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     PAGE: UPLOAD
+═══════════════════════════ -->
+<div class="page" id="page-upload">
+  <div class="container-center">
+    <div class="au1" style="text-align:center;margin-bottom:38px;">
+      <div class="chip" style="margin-bottom:16px;">Step 1 of 3</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:clamp(30px,5.5vw,52px);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:12px;">Upload your resume</h2>
+      <p style="color:var(--text-muted);font-size:15px;">PDF format only.</p>
+    </div>
+    <div class="upload-box as2">
+      <div class="glass" style="padding:32px;border-radius:28px;">
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <input type="file" id="file-input" accept=".pdf" onchange="handleFileSelect(this.files[0])">
+          <div style="font-size:54px;margin-bottom:18px;transition:transform .3s;" id="drop-icon">📎</div>
+          <div style="font-weight:600;font-size:17px;margin-bottom:8px;" id="drop-title">Drag &amp; drop your PDF here</div>
+          <div style="font-size:13px;color:var(--text-muted);" id="drop-sub">or click to browse your files</div>
+        </div>
+        <div id="upload-progress">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;color:var(--text-muted);" id="upload-prog-label">Analyzing…</span>
+            <span style="font-size:13px;color:var(--accent-soft);" id="upload-prog-pct">0%</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" id="upload-prog-fill" style="width:0%"></div></div>
+        </div>
+        <div class="error-banner" id="upload-error"></div>
+        <div id="mock-badge" style="display:none;margin-top:14px;text-align:center;">
+          <span class="mode-badge">⚠️ Demo Mode — API not reachable</span>
+        </div>
+        <button class="btn-glow" id="upload-btn" style="width:100%;margin-top:20px;padding:15px 0;font-size:15px;" onclick="submitUpload()" disabled>
+          Generate Interview Questions →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     PAGE: INTERVIEW
+═══════════════════════════ -->
+<div class="page" id="page-interview">
+  <div class="container">
+    <!-- Top bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px;">
+      <button class="btn-ghost" style="padding:8px 18px;font-size:13px;" onclick="confirmBack()">← Back</button>
+      <span style="font-size:13px;color:var(--text-muted);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="interview-filename"></span>
+    </div>
+    <!-- Progress header -->
+    <div style="margin-bottom:28px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="chip"><span id="q-counter">Question 1 of 10</span></div>
+        <span id="mock-label" style="display:none;" class="mode-badge">⚠️ Demo Mode</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="interview-prog" style="width:10%"></div></div>
+    </div>
+    <!-- Question card -->
+    <div class="q-card glass" id="q-card">
+      <div class="q-num-label" id="q-num-label">Question 1</div>
+      <div class="q-text" id="q-text">Loading question…</div>
+    </div>
+    <!-- Answer area -->
+    <div class="answer-area glass">
+      <div class="answer-label">Your Answer</div>
+      <div class="textarea-wrapper">
+        <textarea id="answer-input" placeholder="Type your answer here. Use specific examples and aim for 3–5 detailed sentences for a higher score…"></textarea>
+      </div>
+      <div class="error-banner" id="eval-error"></div>
+      <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-glow" id="submit-btn" onclick="submitAnswer()" style="padding:13px 32px;font-size:15px;">Submit Answer →</button>
+        <span id="char-count" style="font-size:12px;color:var(--text-dim);">0 chars</span>
+      </div>
+    </div>
+    <!-- Feedback area -->
+    <div id="feedback-container" style="display:none;">
+      <div class="feedback-box glass" id="feedback-box">
+        <div class="feedback-header">
+          <span class="feedback-title">✨ AI Feedback</span>
+          <div class="score-badge" id="feedback-score-display">—/10</div>
+        </div>
+        <div id="feedback-sections"></div>
+      </div>
+      <div style="text-align:right;margin-top:4px;">
+        <button class="btn-glow" id="next-btn" onclick="nextQuestion()" style="padding:14px 44px;font-size:15px;">
+          <span id="next-btn-label">Next Question →</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     PAGE: RESULTS
+═══════════════════════════ -->
+<div class="page" id="page-results">
+  <div class="container">
+    <!-- Hero score card -->
+    <div class="results-hero glass au1">
+      <div class="chip" style="margin-bottom:20px;display:inline-flex;">🎉 Interview Complete</div>
+      <div class="overall-score" id="res-score">—</div>
+      <div class="overall-denom">/10</div>
+      <div class="grade-label" id="res-grade"></div>
+      <p style="color:var(--text-muted);font-size:14px;margin-top:10px;">Across 10 questions</p>
+      <div class="mini-bars" id="mini-bars"></div>
+    </div>
+    <!-- Stats row -->
+    <div class="stats-row au2">
+      <div class="stat-mini-card glass"><div class="stat-mini-icon">🏅</div><div class="stat-mini-val" id="res-high">—</div><div class="stat-mini-label">Highest Score</div></div>
+      <div class="stat-mini-card glass"><div class="stat-mini-icon">📉</div><div class="stat-mini-val" id="res-low">—</div><div class="stat-mini-label">Lowest Score</div></div>
+      <div class="stat-mini-card glass"><div class="stat-mini-icon">📊</div><div class="stat-mini-val" id="res-avg">—</div><div class="stat-mini-label">Average</div></div>
+    </div>
+    <!-- Breakdown -->
+    <h3 class="au3" style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:18px;letter-spacing:-.01em;">Full Breakdown</h3>
+    <div id="accordion-list" class="au3"></div>
+    <div style="text-align:center;margin-top:40px;" class="au4">
+      <button class="btn-glow" style="padding:16px 46px;font-size:16px;" onclick="restartInterview()">Start New Interview →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════
+     JAVASCRIPT
+══════════════════════════════ -->
+<script>
+const API = "http://127.0.0.1:8000";
+
+// ─── STATE ───
+const S = {
+  theme: "dark",
+  hue: 210,
+  questions: [],
+  currentIdx: 0,
+  scores: [],
+  answers: [],
+  feedbacks: [],
+  filename: "",
+  submitting: false,
+  useMock: false
+};
+
+let selectedFile = null;
+
+// ─── MOCK DATA ───
+const MOCK_QUESTIONS = [
+  "Tell me about yourself and your professional background.",
+  "Walk me through a project you're most proud of and your specific role.",
+  "What are your core technical strengths and how have you applied them?",
+  "Describe a situation where you had to solve a complex problem under pressure.",
+  "How do you approach learning new technologies or frameworks?",
+  "Tell me about a time you collaborated effectively with a team.",
+  "What is your experience with AI, machine learning, or data-driven systems?",
+  "How do you ensure quality and reliability in your work?",
+  "Where do you see your career heading in the next 3 years?",
+  "Why should we hire you? What unique value do you bring?"
+];
+
+function mockEvaluate(answer) {
+  let score = 5;
+  const t = answer.toLowerCase();
+  if (answer.length > 200) score += 1.5;
+  if (answer.length > 400) score += 1;
+  if (t.includes("example") || t.includes("project")) score += 0.8;
+  if (t.includes("team") || t.includes("collaborated")) score += 0.5;
+  if (t.includes("result") || t.includes("achieved") || t.includes("improved")) score += 0.7;
+  score = Math.min(10, Math.max(3, score));
+  return {
+    score: +score.toFixed(1),
+    feedback: `Score: ${score.toFixed(1)}\n\nStrengths:\n- Clear and structured communication\n- Relevant to the question asked\n\nAreas for Improvement:\n- Add specific measurable outcomes\n- Include more technical depth and concrete examples\n\nModel Answer Hint:\nStructure your response using the STAR method (Situation, Task, Action, Result) with specific metrics and outcomes wherever possible.`
+  };
+}
+
+// ─── MESH SETUP ───
+(function buildMesh() {
+  const mesh = document.getElementById("mesh");
+  const orbs = [
+    { s: "56vmax", x: "10%", y: "8%",  delay: 0,    dur: 22 },
+    { s: "48vmax", x: "75%", y: "65%", delay: -8,   dur: 26 },
+    { s: "38vmax", x: "55%", y: "20%", delay: -14,  dur: 19 },
+    { s: "30vmax", x: "20%", y: "75%", delay: -5,   dur: 28 },
+  ];
+  orbs.forEach((o, i) => {
+    const el = document.createElement("div");
+    el.className = "orb";
+    el.style.cssText = `width:${o.s};height:${o.s};left:${o.x};top:${o.y};animation-delay:${o.delay}s;animation-duration:${o.dur}s;`;
+    mesh.appendChild(el);
+  });
+  updateOrbColors();
+})();
+
+function updateOrbColors() {
+  const orbs = document.querySelectorAll(".orb");
+  const h = S.hue;
+  const colors = [
+    `hsla(${h},70%,55%,0.22)`,
+    `hsla(${(h+50)%360},65%,60%,0.16)`,
+    `hsla(${(h+170)%360},55%,55%,0.12)`,
+    `hsla(${(h+25)%360},60%,65%,0.14)`,
+  ];
+  orbs.forEach((o, i) => { o.style.background = colors[i] || colors[0]; });
+}
+
+// ─── THEME & HUE ───
+function toggleTheme() {
+  S.theme = S.theme === "dark" ? "light" : "dark";
+  document.body.classList.toggle("light", S.theme === "light");
+  document.getElementById("theme-btn").textContent = S.theme === "dark" ? "🌙" : "☀️";
+}
+function toggleColorPicker() {
+  document.getElementById("color-popup").classList.toggle("open");
+}
+function setHue(v) {
+  S.hue = +v;
+  document.documentElement.style.setProperty("--h", v);
+  document.getElementById("hue-val").textContent = v;
+  document.getElementById("hue-preview").style.background = `hsl(${v},84%,62%)`;
+  updateOrbColors();
+}
+document.addEventListener("click", e => {
+  const popup = document.getElementById("color-popup");
+  const colorBtn = document.querySelector("button[title='Accent color']");
+
+  if (!popup.contains(e.target) && e.target !== colorBtn) {
+    popup.classList.remove("open");
+  }
+});
+
+// ─── NAVIGATION ───
+function goPage(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page-" + name).classList.add("active");
+  document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+  const navEl = document.getElementById("nav-" + name);
+  if (navEl) navEl.classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function navGo(name) {
+  goPage(name);
+}
+function confirmBack() {
+  if (S.currentIdx > 0) {
+    if (!confirm("Go back? Your current progress will be lost.")) return;
+  }
+  resetSession();
+  goPage("upload");
+}
+
+// ─── TOAST ───
+let toastTimer;
+function toast(msg, type = "info", duration = 3500) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ""; }, duration);
+}
+
+// ─── FILE HANDLING ───
+const dropZone = document.getElementById("drop-zone");
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("over"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("over"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropZone.classList.remove("over");
+  const file = e.dataTransfer.files[0];
+  if (file) handleFileSelect(file);
+});
+
+function handleFileSelect(file) {
+  if (!file) return;
+  if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
+    showError("upload-error", "Please upload a PDF file only.");
+    return;
+  }
+  selectedFile = file;
+  S.filename = file.name;
+  document.getElementById("drop-icon").textContent = "✅";
+  document.getElementById("drop-title").textContent = file.name;
+  document.getElementById("drop-sub").textContent = (file.size / 1024).toFixed(1) + " KB";
+  document.getElementById("upload-btn").disabled = false;
+  hideError("upload-error");
+  toast("PDF selected — ready to analyze!", "success");
+}
+
+// ─── UPLOAD & START ───
+async function submitUpload() {
+  if (!selectedFile) return;
+
+  const btn = document.getElementById("upload-btn");
+  const prog = document.getElementById("upload-progress");
+  const fill = document.getElementById("upload-prog-fill");
+  const pctLabel = document.getElementById("upload-prog-pct");
+  const progLabel = document.getElementById("upload-prog-label");
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Analyzing Resume…`;
+  prog.style.display = "block";
+  hideError("upload-error");
+
+  let pct = 0;
+  const tick = setInterval(() => {
+    pct = Math.min(pct + 8, 88);
+    fill.style.width = pct + "%";
+    pctLabel.textContent = pct + "%";
+    if (pct < 30) progLabel.textContent = "Parsing PDF…";
+    else if (pct < 60) progLabel.textContent = "Sending to Gemini AI…";
+    else progLabel.textContent = "Generating questions…";
+  }, 250);
+
+  try {
+    const fd = new FormData();
+    fd.append("resume", selectedFile);
+
+    const res = await fetch(`${API}/api/upload`, {
+      method: "POST",
+      body: fd,
+      credentials: "include"
+    });
+
+    clearInterval(tick);
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${res.status}`);
+    }
+
+    const data = await res.json();
+    S.useMock = false;
+    S.questions = [data.question];  // rest fetched per-answer from session
+
+    fill.style.width = "100%";
+    pctLabel.textContent = "100%";
+    progLabel.textContent = "Ready!";
+    toast("Questions generated! Starting interview…", "success");
+
+    setTimeout(() => startInterview(), 600);
+
+  } catch (e) {
+    clearInterval(tick);
+    console.warn("API unreachable, switching to demo mode:", e.message);
+
+    S.useMock = true;
+    S.questions = [...MOCK_QUESTIONS];
+
+    fill.style.width = "100%";
+    pctLabel.textContent = "100%";
+    progLabel.textContent = "Demo mode active";
+    document.getElementById("mock-badge").style.display = "block";
+    toast("Demo mode: API not reachable — using sample questions", "info", 4500);
+
+    setTimeout(() => startInterview(), 800);
+  }
+}
+
+// ─── INTERVIEW START ───
+function startInterview() {
+  resetSession(true);
+  goPage("interview");
+  document.getElementById("interview-filename").textContent = S.filename;
+  document.getElementById("mock-label").style.display = S.useMock ? "flex" : "none";
+  renderQuestion();
+}
+
+function resetSession(keepData = false) {
+  if (!keepData) {
+    S.questions = [];
+    S.useMock = false;
+    selectedFile = null;
+    const btn = document.getElementById("upload-btn");
+    btn.disabled = true;
+    btn.innerHTML = "Generate Interview Questions →";
+    document.getElementById("upload-progress").style.display = "none";
+    document.getElementById("upload-prog-fill").style.width = "0%";
+    document.getElementById("mock-badge").style.display = "none";
+    document.getElementById("drop-icon").textContent = "📎";
+    document.getElementById("drop-title").textContent = "Drag & drop your PDF here";
+    document.getElementById("drop-sub").textContent = "or click to browse your files";
+    document.getElementById("file-input").value = "";
+  }
+  S.currentIdx = 0;
+  S.scores = [];
+  S.answers = [];
+  S.feedbacks = [];
+  S.submitting = false;
+}
+
+// ─── RENDER QUESTION ───
+function renderQuestion() {
+  const q = S.questions[S.currentIdx] || "Loading…";
+  const idx = S.currentIdx;
+  const total = S.useMock ? 10 : 10;
+
+  document.getElementById("q-text").textContent = q;
+  document.getElementById("q-counter").textContent = `Question ${idx + 1} of ${total}`;
+  document.getElementById("q-num-label").textContent = `Question ${idx + 1}`;
+  document.getElementById("interview-prog").style.width = ((idx + 1) / total * 100) + "%";
+
+  const input = document.getElementById("answer-input");
+  input.value = "";
+  input.disabled = false;
+  document.getElementById("char-count").textContent = "0 chars";
+
+  const submitBtn = document.getElementById("submit-btn");
+  submitBtn.disabled = false;
+  submitBtn.innerHTML = "Submit Answer →";
+
+  document.getElementById("feedback-container").style.display = "none";
+  hideError("eval-error");
+
+  // Animate question card in
+  const card = document.getElementById("q-card");
+  card.style.animation = "none";
+  card.offsetHeight; // reflow
+  card.style.animation = "scaleIn .4s cubic-bezier(.22,1,.36,1) both";
+}
+
+// ─── CHAR COUNT ───
+document.getElementById("answer-input").addEventListener("input", function () {
+  document.getElementById("char-count").textContent = this.value.length + " chars";
+});
+
+// ─── SUBMIT ANSWER ───
+async function submitAnswer() {
+  const answer = document.getElementById("answer-input").value.trim();
+  if (!answer) {
+    toast("Please write your answer first!", "error");
+    return;
+  }
+  if (answer.length < 20) {
+    toast("Answer is too short — please elaborate!", "error");
+    return;
+  }
+  if (S.submitting) return;
+  S.submitting = true;
+
+  const submitBtn = document.getElementById("submit-btn");
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = `<span class="spinner"></span> Evaluating…`;
+  document.getElementById("answer-input").disabled = true;
+  hideError("eval-error");
+
+  let result;
+
+  try {
+    if (S.useMock) {
+      await delay(800);
+      result = mockEvaluate(answer);
+    } else {
+      const res = await fetch(`${API}/api/answer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ answer })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      if (data.finished) {
+        // All questions done from server
+        S.answers.push(answer);
+        S.scores.push(data.history[data.history.length - 1].score);
+        S.feedbacks.push(data.history[data.history.length - 1].feedback);
+        showResults(data.total_score, data.history);
+        S.submitting = false;
+        return;
+      }
+
+      result = {
+        score: data.score,
+        feedback: data.feedback,
+        next_question: data.next_question
+      };
+
+      // Preload next question from server response
+      if (data.next_question) {
+        S.questions[data.question_index] = data.next_question;
+      }
+    }
+  } catch (e) {
+    console.warn("Eval API error, using mock:", e.message);
+    S.useMock = true;
+    document.getElementById("mock-label").style.display = "flex";
+    result = mockEvaluate(answer);
+    toast("Switched to demo mode for evaluation", "info");
+  }
+
+  S.answers.push(answer);
+  S.scores.push(result.score);
+  S.feedbacks.push(result.feedback);
+  S.currentIdx++;
+
+  renderFeedback(result.feedback, result.score);
+  S.submitting = false;
+}
+
+// ─── RENDER FEEDBACK ───
+function renderFeedback(raw, score) {
+  const container = document.getElementById("feedback-container");
+  const sections = document.getElementById("feedback-sections");
+
+  document.getElementById("feedback-score-display").textContent = `${score}/10`;
+
+  // Parse feedback into sections if possible
+  const parts = parseFeedback(raw);
+
+  sections.innerHTML = parts.map(p => `
+    <div class="fb-section glass-inner">
+      <div class="fb-section-label">${p.label}</div>
+      <div class="fb-section-body">${p.body}</div>
+    </div>
+  `).join("");
+
+  container.style.display = "block";
+  container.style.animation = "none";
+  container.offsetHeight;
+  container.style.animation = "";
+
+  // Update next button label
+  const isLast = S.currentIdx >= 10;
+  document.getElementById("next-btn-label").textContent = isLast ? "View Results →" : "Next Question →";
+
+  // Scroll to feedback
+  setTimeout(() => container.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
+}
+
+function parseFeedback(raw) {
+  if (!raw) return [{ label: "Feedback", body: "Good effort on your answer." }];
+
+  const sections = [];
+  const scoreMatch = raw.match(/Score:\s*([\d.]+)/i);
+  if (scoreMatch) {
+    sections.push({ label: "Score", body: `${scoreMatch[1]} / 10` });
+  }
+
+  const strengthMatch = raw.match(/Strengths?:([^]*?)(?=Areas?|Model|Improve|$)/i);
+  if (strengthMatch) sections.push({ label: "Strengths", body: strengthMatch[1].trim() });
+
+  const improveMatch = raw.match(/(?:Areas? for Improvement|Improvements?):([^]*?)(?=Model|$)/i);
+  if (improveMatch) sections.push({ label: "Areas for Improvement", body: improveMatch[1].trim() });
+
+  const modelMatch = raw.match(/Model Answer(?:\s+Hint)?:([^]*?)$/i);
+  if (modelMatch) sections.push({ label: "Model Answer Hint", body: modelMatch[1].trim() });
+
+  if (sections.length === 0) {
+    sections.push({ label: "AI Feedback", body: raw.trim() });
+  }
+
+  return sections;
+}
+
+// ─── NEXT QUESTION ───
+function nextQuestion() {
+  if (S.currentIdx >= 10) {
+    // Build history for results display
+    const history = S.questions.slice(0, 10).map((q, i) => ({
+      question: q,
+      answer: S.answers[i] || "",
+      score: S.scores[i] || 0,
+      feedback: S.feedbacks[i] || ""
+    }));
+    const avg = S.scores.reduce((a, b) => a + b, 0) / S.scores.length;
+    showResults(avg, history);
+    return;
+  }
+
+  // If we don't have next question yet (non-mock, not prefetched)
+  if (!S.useMock && !S.questions[S.currentIdx]) {
+    // Should not normally happen, but safe fallback
+    S.questions[S.currentIdx] = `Question ${S.currentIdx + 1}`;
+  }
+
+  renderQuestion();
+}
+
+// ─── RESULTS ───
+function showResults(totalScore, history) {
+  goPage("results");
+
+  const avg = typeof totalScore === "number" ? totalScore :
+    (S.scores.reduce((a, b) => a + b, 0) / S.scores.length);
+
+  document.getElementById("res-score").textContent = avg.toFixed(1);
+  document.getElementById("res-grade").textContent =
+    avg >= 9 ? "🌟 Outstanding" :
+    avg >= 8 ? "🏆 Excellent" :
+    avg >= 7 ? "✅ Good" :
+    avg >= 5 ? "📈 Average" : "🔄 Needs Work";
+
+  const scores = (history || []).map(h => h.score);
+  document.getElementById("res-high").textContent = scores.length ? Math.max(...scores).toFixed(1) : "—";
+  document.getElementById("res-low").textContent = scores.length ? Math.min(...scores).toFixed(1) : "—";
+  document.getElementById("res-avg").textContent = avg.toFixed(1);
+
+  // Mini bar chart
+  const bars = document.getElementById("mini-bars");
+  bars.innerHTML = scores.map((s, i) => {
+    const pct = (s / 10) * 100;
+    const col = s >= 8 ? `hsl(142,70%,55%)` : s >= 6 ? `hsl(var(--h),78%,62%)` : `hsl(30,80%,58%)`;
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+      <div style="font-size:9px;color:var(--text-dim);">${s}</div>
+      <div class="mini-bar" style="height:${Math.max(8, pct * 0.4)}px;background:${col};"></div>
+      <div style="font-size:9px;color:var(--text-dim);">Q${i+1}</div>
+    </div>`;
+  }).join("");
+
+  // Accordion
+  const list = document.getElementById("accordion-list");
+  list.innerHTML = (history || []).map((h, i) => {
+    const scoreColor = h.score >= 8 ? "hsl(142,70%,55%)" : h.score >= 6 ? "hsl(var(--h),78%,62%)" : "hsl(30,80%,58%)";
+    return `
+    <div class="accordion-item glass">
+      <button class="accordion-head" onclick="toggleAccordion(${i})">
+        <span class="accordion-q-num">Q${i+1}</span>
+        <div class="accordion-meta">
+          <div class="accordion-q">${escHtml(h.question)}</div>
+          <div class="accordion-a-preview">${escHtml(h.answer || "No answer")}</div>
+        </div>
+        <span class="accordion-score" style="color:${scoreColor}">${h.score}/10</span>
+        <span class="accordion-chevron" id="chev-${i}">▾</span>
+      </button>
+      <div class="accordion-body" id="acc-body-${i}">
+        <div class="acc-detail glass-inner">
+          <div class="acc-detail-label">Your Answer</div>
+          <div class="acc-detail-body">${escHtml(h.answer || "No answer submitted")}</div>
+        </div>
+        <div class="acc-detail glass-inner" style="border-color:${scoreColor}44;">
+          <div class="acc-detail-label">Score: ${h.score}/10</div>
+          <div class="acc-detail-body">${escHtml(h.feedback || "")}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function toggleAccordion(idx) {
+  const body = document.getElementById(`acc-body-${idx}`);
+  const chev = document.getElementById(`chev-${idx}`);
+  const isOpen = body.classList.contains("open");
+  body.classList.toggle("open", !isOpen);
+  chev.classList.toggle("open", !isOpen);
+}
+
+// ─── RESTART ───
+function restartInterview() {
+  resetSession(false);
+  goPage("upload");
+}
+
+// ─── HELPERS ───
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg; el.style.display = "block"; }
+}
+function hideError(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = "none";
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function delay(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+</script>
+</body>
+</html>
