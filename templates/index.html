@@ -216,6 +216,23 @@ textarea#answer-input:disabled{opacity:.55;cursor:not-allowed;}
 
 /* ═══ MODE BADGE ═══ */
 .mode-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(251,191,36,.10);color:rgba(251,191,36,.85);border:1px solid rgba(251,191,36,.25);}
+/* Force the score to be visible */
+#res-score {
+    /* Absolute position to pull it out of the container stack */
+    position: relative !important;
+    top: 5px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    
+    /* Extreme visibility */
+    color: #ff0000 !important; /* Bright red to see if it shows up */
+    font-size: 80px !important;
+    font-weight: 900 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: rgb(167, 177, 212) !important; /* Yellow background to see the box */
+    z-index: 99999 !important;
+}
 </style>
 </head>
 <body>
@@ -402,27 +419,28 @@ textarea#answer-input:disabled{opacity:.55;cursor:not-allowed;}
 ═══════════════════════════ -->
 <div class="page" id="page-results">
   <div class="container">
-    <!-- Hero score card -->
+    
     <div class="results-hero glass au1">
       <div class="chip" style="margin-bottom:20px;display:inline-flex;">🎉 Interview Complete</div>
-      <div class="overall-score" id="res-score">—</div>
+      <div class="overall-score" id="res-score">0.0</div> 
       <div class="overall-denom">/10</div>
-      <div class="grade-label" id="res-grade"></div>
+      <div class="grade-label" id="res-grade">Calculating...</div>
       <p style="color:var(--text-muted);font-size:14px;margin-top:10px;">Across 10 questions</p>
       <div class="mini-bars" id="mini-bars"></div>
     </div>
-    <!-- Stats row -->
-    <div class="stats-row au2">
-      <div class="stat-mini-card glass"><div class="stat-mini-icon">🏅</div><div class="stat-mini-val" id="res-high">—</div><div class="stat-mini-label">Highest Score</div></div>
-      <div class="stat-mini-card glass"><div class="stat-mini-icon">📉</div><div class="stat-mini-val" id="res-low">—</div><div class="stat-mini-label">Lowest Score</div></div>
-      <div class="stat-mini-card glass"><div class="stat-mini-icon">📊</div><div class="stat-mini-val" id="res-avg">—</div><div class="stat-mini-label">Average</div></div>
+
+    <div class="glass au2" style="padding:28px; border-radius:24px; margin-bottom: 28px; text-align:left;">
+      <h3 style="font-family:'Syne',sans-serif; margin-bottom:12px; color:var(--accent-soft);">🌟 Overall AI Assessment</h3>
+      <div id="res-overall" style="font-size:15px; line-height:1.7; white-space:pre-wrap;">Generating final report...</div>
     </div>
-    <!-- Breakdown -->
+
     <h3 class="au3" style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:18px;letter-spacing:-.01em;">Full Breakdown</h3>
     <div id="accordion-list" class="au3"></div>
+    
     <div style="text-align:center;margin-top:40px;" class="au4">
       <button class="btn-glow" style="padding:16px 46px;font-size:16px;" onclick="restartInterview()">Start New Interview →</button>
     </div>
+    
   </div>
 </div>
 
@@ -437,16 +455,9 @@ const API = "http://127.0.0.1:8000";
 
 // ─── STATE ───
 const S = {
-  theme: "dark",
-  hue: 210,
-  questions: [],
-  currentIdx: 0,
-  scores: [],
-  answers: [],
-  feedbacks: [],
-  filename: "",
-  submitting: false,
-  useMock: false
+  theme: "dark", hue: 210, questions: [], currentIdx: 0,
+  scores: [], answers: [], feedbacks: [], filename: "",
+  submitting: false, useMock: false
 };
 
 let selectedFile = null;
@@ -466,17 +477,21 @@ const MOCK_QUESTIONS = [
 ];
 
 function mockEvaluate(answer) {
-  let score = 5;
+  let score = 5.0;
   const t = answer.toLowerCase();
   if (answer.length > 200) score += 1.5;
   if (answer.length > 400) score += 1;
   if (t.includes("example") || t.includes("project")) score += 0.8;
   if (t.includes("team") || t.includes("collaborated")) score += 0.5;
-  if (t.includes("result") || t.includes("achieved") || t.includes("improved")) score += 0.7;
-  score = Math.min(10, Math.max(3, score));
+  if (t.includes("result")) score += 0.7;
+  score = Math.min(10.0, Math.max(0.0, score));
+  
+  // If answer is gibberish/too short
+  if (answer.length < 10 || t === "asdf" || t === "i don't know") score = 0.0;
+
   return {
-    score: +score.toFixed(1),
-    feedback: `Score: ${score.toFixed(1)}\n\nStrengths:\n- Clear and structured communication\n- Relevant to the question asked\n\nAreas for Improvement:\n- Add specific measurable outcomes\n- Include more technical depth and concrete examples\n\nModel Answer Hint:\nStructure your response using the STAR method (Situation, Task, Action, Result) with specific metrics and outcomes wherever possible.`
+    score: score,
+    feedback: `Strengths:\nGood communication.\n\nAreas for Improvement:\nAdd more depth.\n\nModel Answer Hint:\nUse the STAR method.`
   };
 }
 
@@ -502,10 +517,8 @@ function updateOrbColors() {
   const orbs = document.querySelectorAll(".orb");
   const h = S.hue;
   const colors = [
-    `hsla(${h},70%,55%,0.22)`,
-    `hsla(${(h+50)%360},65%,60%,0.16)`,
-    `hsla(${(h+170)%360},55%,55%,0.12)`,
-    `hsla(${(h+25)%360},60%,65%,0.14)`,
+    `hsla(${h},70%,55%,0.22)`, `hsla(${(h+50)%360},65%,60%,0.16)`,
+    `hsla(${(h+170)%360},55%,55%,0.12)`, `hsla(${(h+25)%360},60%,65%,0.14)`,
   ];
   orbs.forEach((o, i) => { o.style.background = colors[i] || colors[0]; });
 }
@@ -516,9 +529,7 @@ function toggleTheme() {
   document.body.classList.toggle("light", S.theme === "light");
   document.getElementById("theme-btn").textContent = S.theme === "dark" ? "🌙" : "☀️";
 }
-function toggleColorPicker() {
-  document.getElementById("color-popup").classList.toggle("open");
-}
+function toggleColorPicker() { document.getElementById("color-popup").classList.toggle("open"); }
 function setHue(v) {
   S.hue = +v;
   document.documentElement.style.setProperty("--h", v);
@@ -529,10 +540,7 @@ function setHue(v) {
 document.addEventListener("click", e => {
   const popup = document.getElementById("color-popup");
   const colorBtn = document.querySelector("button[title='Accent color']");
-
-  if (!popup.contains(e.target) && e.target !== colorBtn) {
-    popup.classList.remove("open");
-  }
+  if (!popup.contains(e.target) && e.target !== colorBtn) popup.classList.remove("open");
 });
 
 // ─── NAVIGATION ───
@@ -544,25 +552,18 @@ function goPage(name) {
   if (navEl) navEl.classList.add("active");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
-function navGo(name) {
-  goPage(name);
-}
+function navGo(name) { goPage(name); }
 function confirmBack() {
-  if (S.currentIdx > 0) {
-    if (!confirm("Go back? Your current progress will be lost.")) return;
-  }
+  if (S.currentIdx > 0 && !confirm("Go back? Your progress will be lost.")) return;
   resetSession();
   goPage("upload");
 }
 
-// ─── TOAST ───
-let toastTimer;
 function toast(msg, type = "info", duration = 3500) {
   const el = document.getElementById("toast");
   el.textContent = msg;
   el.className = `show ${type}`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = ""; }, duration);
+  setTimeout(() => { el.className = ""; }, duration);
 }
 
 // ─── FILE HANDLING ───
@@ -570,144 +571,92 @@ const dropZone = document.getElementById("drop-zone");
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("over"); });
 dropZone.addEventListener("dragleave", () => dropZone.classList.remove("over"));
 dropZone.addEventListener("drop", e => {
-  e.preventDefault();
-  dropZone.classList.remove("over");
-  const file = e.dataTransfer.files[0];
-  if (file) handleFileSelect(file);
+  e.preventDefault(); dropZone.classList.remove("over");
+  if (e.dataTransfer.files[0]) handleFileSelect(e.dataTransfer.files[0]);
 });
 
 function handleFileSelect(file) {
-  if (!file) return;
   if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
-    showError("upload-error", "Please upload a PDF file only.");
-    return;
+    showError("upload-error", "Please upload a PDF file only."); return;
   }
   selectedFile = file;
   S.filename = file.name;
   document.getElementById("drop-icon").textContent = "✅";
   document.getElementById("drop-title").textContent = file.name;
-  document.getElementById("drop-sub").textContent = (file.size / 1024).toFixed(1) + " KB";
   document.getElementById("upload-btn").disabled = false;
   hideError("upload-error");
-  toast("PDF selected — ready to analyze!", "success");
 }
 
 // ─── UPLOAD & START ───
 async function submitUpload() {
   if (!selectedFile) return;
-
   const btn = document.getElementById("upload-btn");
   const prog = document.getElementById("upload-progress");
   const fill = document.getElementById("upload-prog-fill");
-  const pctLabel = document.getElementById("upload-prog-pct");
-  const progLabel = document.getElementById("upload-prog-label");
 
   btn.disabled = true;
   btn.innerHTML = `<span class="spinner"></span> Analyzing Resume…`;
   prog.style.display = "block";
   hideError("upload-error");
 
-  let pct = 0;
-  const tick = setInterval(() => {
-    pct = Math.min(pct + 8, 88);
-    fill.style.width = pct + "%";
-    pctLabel.textContent = pct + "%";
-    if (pct < 30) progLabel.textContent = "Parsing PDF…";
-    else if (pct < 60) progLabel.textContent = "Sending to Gemini AI…";
-    else progLabel.textContent = "Generating questions…";
-  }, 250);
-
   try {
     const fd = new FormData();
     fd.append("resume", selectedFile);
-
-    const res = await fetch(`${API}/api/upload`, {
-      method: "POST",
-      body: fd,
-      credentials: "include"
-    });
-
-    clearInterval(tick);
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Server error ${res.status}`);
-    }
-
+    const res = await fetch(`${API}/api/upload`, { method: "POST", body: fd });
     const data = await res.json();
+    
+    if (!res.ok) throw new Error(data.error || "Server error");
+
     S.useMock = false;
-    S.questions = [data.question];  // rest fetched per-answer from session
+    S.questions = data.questions || [];
+    
+    while(S.questions.length < 10) S.questions.push(`General Question ${S.questions.length + 1}`);
 
     fill.style.width = "100%";
-    pctLabel.textContent = "100%";
-    progLabel.textContent = "Ready!";
     toast("Questions generated! Starting interview…", "success");
-
     setTimeout(() => startInterview(), 600);
 
   } catch (e) {
-    clearInterval(tick);
-    console.warn("API unreachable, switching to demo mode:", e.message);
-
     S.useMock = true;
     S.questions = [...MOCK_QUESTIONS];
-
     fill.style.width = "100%";
-    pctLabel.textContent = "100%";
-    progLabel.textContent = "Demo mode active";
     document.getElementById("mock-badge").style.display = "block";
-    toast("Demo mode: API not reachable — using sample questions", "info", 4500);
-
+    toast("Demo mode active — using sample questions", "info");
     setTimeout(() => startInterview(), 800);
   }
 }
 
-// ─── INTERVIEW START ───
 function startInterview() {
   resetSession(true);
   goPage("interview");
   document.getElementById("interview-filename").textContent = S.filename;
-  document.getElementById("mock-label").style.display = S.useMock ? "flex" : "none";
   renderQuestion();
 }
 
 function resetSession(keepData = false) {
   if (!keepData) {
-    S.questions = [];
-    S.useMock = false;
-    selectedFile = null;
+    S.questions = []; S.useMock = false; selectedFile = null;
     const btn = document.getElementById("upload-btn");
-    btn.disabled = true;
-    btn.innerHTML = "Generate Interview Questions →";
+    btn.disabled = true; btn.innerHTML = "Generate Interview Questions →";
     document.getElementById("upload-progress").style.display = "none";
-    document.getElementById("upload-prog-fill").style.width = "0%";
-    document.getElementById("mock-badge").style.display = "none";
     document.getElementById("drop-icon").textContent = "📎";
-    document.getElementById("drop-title").textContent = "Drag & drop your PDF here";
-    document.getElementById("drop-sub").textContent = "or click to browse your files";
     document.getElementById("file-input").value = "";
   }
-  S.currentIdx = 0;
-  S.scores = [];
-  S.answers = [];
-  S.feedbacks = [];
-  S.submitting = false;
+  S.currentIdx = 0; S.scores = []; S.answers = []; S.feedbacks = []; S.submitting = false;
 }
 
 // ─── RENDER QUESTION ───
 function renderQuestion() {
-  const q = S.questions[S.currentIdx] || "Loading…";
+  const q = S.questions[S.currentIdx] || "Generating question...";
   const idx = S.currentIdx;
-  const total = S.useMock ? 10 : 10;
 
   document.getElementById("q-text").textContent = q;
-  document.getElementById("q-counter").textContent = `Question ${idx + 1} of ${total}`;
+  document.getElementById("q-counter").textContent = `Question ${idx + 1} of 10`;
   document.getElementById("q-num-label").textContent = `Question ${idx + 1}`;
-  document.getElementById("interview-prog").style.width = ((idx + 1) / total * 100) + "%";
+  document.getElementById("interview-prog").style.width = ((idx + 1) / 10 * 100) + "%";
 
   const input = document.getElementById("answer-input");
-  input.value = "";
-  input.disabled = false;
+  input.value = ""; input.disabled = false;
   document.getElementById("char-count").textContent = "0 chars";
 
   const submitBtn = document.getElementById("submit-btn");
@@ -716,15 +665,8 @@ function renderQuestion() {
 
   document.getElementById("feedback-container").style.display = "none";
   hideError("eval-error");
-
-  // Animate question card in
-  const card = document.getElementById("q-card");
-  card.style.animation = "none";
-  card.offsetHeight; // reflow
-  card.style.animation = "scaleIn .4s cubic-bezier(.22,1,.36,1) both";
 }
 
-// ─── CHAR COUNT ───
 document.getElementById("answer-input").addEventListener("input", function () {
   document.getElementById("char-count").textContent = this.value.length + " chars";
 });
@@ -732,71 +674,35 @@ document.getElementById("answer-input").addEventListener("input", function () {
 // ─── SUBMIT ANSWER ───
 async function submitAnswer() {
   const answer = document.getElementById("answer-input").value.trim();
-  if (!answer) {
-    toast("Please write your answer first!", "error");
-    return;
-  }
-  if (answer.length < 20) {
-    toast("Answer is too short — please elaborate!", "error");
-    return;
-  }
+  if (answer.length < 20) { toast("Answer is too short!", "error"); return; }
   if (S.submitting) return;
   S.submitting = true;
 
   const submitBtn = document.getElementById("submit-btn");
-  submitBtn.disabled = true;
   submitBtn.innerHTML = `<span class="spinner"></span> Evaluating…`;
   document.getElementById("answer-input").disabled = true;
-  hideError("eval-error");
 
   let result;
-
   try {
     if (S.useMock) {
-      await delay(800);
       result = mockEvaluate(answer);
     } else {
       const res = await fetch(`${API}/api/answer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ answer })
+        body: JSON.stringify({ question: S.questions[S.currentIdx], answer: answer })
       });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Server error ${res.status}`);
-      }
-
       const data = await res.json();
-
-      if (data.finished) {
-        // All questions done from server
-        S.answers.push(answer);
-        S.scores.push(data.history[data.history.length - 1].score);
-        S.feedbacks.push(data.history[data.history.length - 1].feedback);
-        showResults(data.total_score, data.history);
-        S.submitting = false;
-        return;
+      
+      // Explicitly check for valid score to prevent Javascript from ignoring 0.0
+      let finalScore = 6.0;
+      if (data.score !== undefined && data.score !== null) {
+          finalScore = Number(data.score);
       }
-
-      result = {
-        score: data.score,
-        feedback: data.feedback,
-        next_question: data.next_question
-      };
-
-      // Preload next question from server response
-      if (data.next_question) {
-        S.questions[data.question_index] = data.next_question;
-      }
+      result = { score: finalScore, feedback: data.feedback || "Good effort." };
     }
   } catch (e) {
-    console.warn("Eval API error, using mock:", e.message);
-    S.useMock = true;
-    document.getElementById("mock-label").style.display = "flex";
     result = mockEvaluate(answer);
-    toast("Switched to demo mode for evaluation", "info");
   }
 
   S.answers.push(answer);
@@ -808,174 +714,115 @@ async function submitAnswer() {
   S.submitting = false;
 }
 
-// ─── RENDER FEEDBACK ───
 function renderFeedback(raw, score) {
   const container = document.getElementById("feedback-container");
   const sections = document.getElementById("feedback-sections");
+  document.getElementById("feedback-score-display").textContent = `${Number(score).toFixed(1)}/10`;
 
-  document.getElementById("feedback-score-display").textContent = `${score}/10`;
+  const strengthMatch = raw.match(/Strengths?:([^]*?)(?=Areas?|Model|Improve|$)/i);
+  const improveMatch = raw.match(/(?:Areas? for Improvement|Improvements?):([^]*?)(?=Model|$)/i);
+  const modelMatch = raw.match(/Model Answer(?:\s+Hint)?:([^]*?)$/i);
 
-  // Parse feedback into sections if possible
-  const parts = parseFeedback(raw);
+  let html = "";
+  if (strengthMatch) html += `<div class="fb-section glass-inner"><div class="fb-section-label">Strengths</div><div class="fb-section-body">${strengthMatch[1].trim()}</div></div>`;
+  if (improveMatch) html += `<div class="fb-section glass-inner"><div class="fb-section-label">Areas for Improvement</div><div class="fb-section-body">${improveMatch[1].trim()}</div></div>`;
+  if (modelMatch) html += `<div class="fb-section glass-inner"><div class="fb-section-label">Model Answer Hint</div><div class="fb-section-body">${modelMatch[1].trim()}</div></div>`;
+  if (!html) html = `<div class="fb-section glass-inner"><div class="fb-section-label">Feedback</div><div class="fb-section-body">${raw.trim()}</div></div>`;
 
-  sections.innerHTML = parts.map(p => `
-    <div class="fb-section glass-inner">
-      <div class="fb-section-label">${p.label}</div>
-      <div class="fb-section-body">${p.body}</div>
-    </div>
-  `).join("");
-
+  sections.innerHTML = html;
+  document.getElementById("next-btn-label").textContent = S.currentIdx >= 10 ? "View Results →" : "Next Question →";
   container.style.display = "block";
-  container.style.animation = "none";
-  container.offsetHeight;
-  container.style.animation = "";
-
-  // Update next button label
-  const isLast = S.currentIdx >= 10;
-  document.getElementById("next-btn-label").textContent = isLast ? "View Results →" : "Next Question →";
-
-  // Scroll to feedback
   setTimeout(() => container.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
 }
 
-function parseFeedback(raw) {
-  if (!raw) return [{ label: "Feedback", body: "Good effort on your answer." }];
-
-  const sections = [];
-  const scoreMatch = raw.match(/Score:\s*([\d.]+)/i);
-  if (scoreMatch) {
-    sections.push({ label: "Score", body: `${scoreMatch[1]} / 10` });
-  }
-
-  const strengthMatch = raw.match(/Strengths?:([^]*?)(?=Areas?|Model|Improve|$)/i);
-  if (strengthMatch) sections.push({ label: "Strengths", body: strengthMatch[1].trim() });
-
-  const improveMatch = raw.match(/(?:Areas? for Improvement|Improvements?):([^]*?)(?=Model|$)/i);
-  if (improveMatch) sections.push({ label: "Areas for Improvement", body: improveMatch[1].trim() });
-
-  const modelMatch = raw.match(/Model Answer(?:\s+Hint)?:([^]*?)$/i);
-  if (modelMatch) sections.push({ label: "Model Answer Hint", body: modelMatch[1].trim() });
-
-  if (sections.length === 0) {
-    sections.push({ label: "AI Feedback", body: raw.trim() });
-  }
-
-  return sections;
-}
-
-// ─── NEXT QUESTION ───
-function nextQuestion() {
+// ─── NEXT QUESTION / OVERALL REPORT ───
+async function nextQuestion() {
   if (S.currentIdx >= 10) {
-    // Build history for results display
+    document.getElementById("next-btn-label").innerHTML = `<span class="spinner"></span> Compiling Report...`;
+    
     const history = S.questions.slice(0, 10).map((q, i) => ({
-      question: q,
-      answer: S.answers[i] || "",
-      score: S.scores[i] || 0,
-      feedback: S.feedbacks[i] || ""
+      question: q, answer: S.answers[i], score: S.scores[i], feedback: S.feedbacks[i]
     }));
-    const avg = S.scores.reduce((a, b) => a + b, 0) / S.scores.length;
-    showResults(avg, history);
+
+    if (S.useMock) {
+      showResults(history, "Great job overall. Practice adding more STAR format examples.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/api/overall`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history })
+      });
+      const data = await res.json();
+      showResults(history, data.overall_feedback);
+    } catch(e) {
+      showResults(history, "Overall feedback could not be generated.");
+    }
     return;
   }
-
-  // If we don't have next question yet (non-mock, not prefetched)
-  if (!S.useMock && !S.questions[S.currentIdx]) {
-    // Should not normally happen, but safe fallback
-    S.questions[S.currentIdx] = `Question ${S.currentIdx + 1}`;
-  }
-
   renderQuestion();
 }
-
-// ─── RESULTS ───
-function showResults(totalScore, history) {
+// ─── RESULTS PAGE ───
+function showResults(history, overallFeedback) {
   goPage("results");
 
-  const avg = typeof totalScore === "number" ? totalScore :
-    (S.scores.reduce((a, b) => a + b, 0) / S.scores.length);
+  // 1. Bulletproof Math: Safely add scores
+  let totalScore = 0;
+  let validScoreCount = 0;
+  
+  for (let i = 0; i < S.scores.length; i++) {
+      let currentScore = parseFloat(S.scores[i]);
+      if (!isNaN(currentScore)) {
+          totalScore += currentScore;
+          validScoreCount++;
+      }
+  }
 
-  document.getElementById("res-score").textContent = avg.toFixed(1);
-  document.getElementById("res-grade").textContent =
-    avg >= 9 ? "🌟 Outstanding" :
-    avg >= 8 ? "🏆 Excellent" :
-    avg >= 7 ? "✅ Good" :
-    avg >= 5 ? "📈 Average" : "🔄 Needs Work";
+  const avg = validScoreCount > 0 ? (totalScore / validScoreCount) : 0;
 
-  const scores = (history || []).map(h => h.score);
-  document.getElementById("res-high").textContent = scores.length ? Math.max(...scores).toFixed(1) : "—";
-  document.getElementById("res-low").textContent = scores.length ? Math.min(...scores).toFixed(1) : "—";
-  document.getElementById("res-avg").textContent = avg.toFixed(1);
+  // 2. Safely Update UI Elements
+  const scoreEl = document.getElementById("res-score");
+  if (scoreEl) scoreEl.textContent = avg.toFixed(1);
+  
+  const gradeEl = document.getElementById("res-grade");
+  if (gradeEl) gradeEl.textContent = avg >= 9 ? "🌟 Outstanding" : avg >= 8 ? "🏆 Excellent" : avg >= 7 ? "✅ Good" : avg >= 5 ? "📈 Average" : "🔄 Needs Work";
+  
+  const overallBox = document.getElementById("res-overall");
+  if (overallBox) overallBox.textContent = overallFeedback || "No overall feedback available.";
 
-  // Mini bar chart
-  const bars = document.getElementById("mini-bars");
-  bars.innerHTML = scores.map((s, i) => {
-    const pct = (s / 10) * 100;
-    const col = s >= 8 ? `hsl(142,70%,55%)` : s >= 6 ? `hsl(var(--h),78%,62%)` : `hsl(30,80%,58%)`;
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
-      <div style="font-size:9px;color:var(--text-dim);">${s}</div>
-      <div class="mini-bar" style="height:${Math.max(8, pct * 0.4)}px;background:${col};"></div>
-      <div style="font-size:9px;color:var(--text-dim);">Q${i+1}</div>
-    </div>`;
-  }).join("");
+  // 3. Generate Mini Bars
+  const barsEl = document.getElementById("mini-bars");
+  if (barsEl) {
+    barsEl.innerHTML = S.scores.map((s, i) => {
+      let cleanS = parseFloat(s) || 0;
+      const col = cleanS >= 8 ? `hsl(142,70%,55%)` : cleanS >= 6 ? `hsl(var(--h),78%,62%)` : `hsl(30,80%,58%)`;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="font-size:9px;color:var(--text-dim);">${cleanS.toFixed(1)}</div><div class="mini-bar" style="height:${Math.max(8, (cleanS/10)*40)}px;background:${col};"></div><div style="font-size:9px;color:var(--text-dim);">Q${i+1}</div></div>`;
+    }).join("");
+  }
 
-  // Accordion
-  const list = document.getElementById("accordion-list");
-  list.innerHTML = (history || []).map((h, i) => {
-    const scoreColor = h.score >= 8 ? "hsl(142,70%,55%)" : h.score >= 6 ? "hsl(var(--h),78%,62%)" : "hsl(30,80%,58%)";
-    return `
-    <div class="accordion-item glass">
-      <button class="accordion-head" onclick="toggleAccordion(${i})">
-        <span class="accordion-q-num">Q${i+1}</span>
-        <div class="accordion-meta">
-          <div class="accordion-q">${escHtml(h.question)}</div>
-          <div class="accordion-a-preview">${escHtml(h.answer || "No answer")}</div>
-        </div>
-        <span class="accordion-score" style="color:${scoreColor}">${h.score}/10</span>
-        <span class="accordion-chevron" id="chev-${i}">▾</span>
-      </button>
-      <div class="accordion-body" id="acc-body-${i}">
-        <div class="acc-detail glass-inner">
-          <div class="acc-detail-label">Your Answer</div>
-          <div class="acc-detail-body">${escHtml(h.answer || "No answer submitted")}</div>
-        </div>
-        <div class="acc-detail glass-inner" style="border-color:${scoreColor}44;">
-          <div class="acc-detail-label">Score: ${h.score}/10</div>
-          <div class="acc-detail-body">${escHtml(h.feedback || "")}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join("");
+  // 4. Generate Accordion History
+  const accEl = document.getElementById("accordion-list");
+  if (accEl) {
+    accEl.innerHTML = (history || []).map((h, i) => {
+      let cleanS = parseFloat(h.score) || 0;
+      const color = cleanS >= 8 ? "hsl(142,70%,55%)" : cleanS >= 6 ? "hsl(var(--h),78%,62%)" : "hsl(30,80%,58%)";
+      return `<div class="accordion-item glass"><button class="accordion-head" onclick="toggleAccordion(${i})"><span class="accordion-q-num">Q${i+1}</span><div class="accordion-meta"><div class="accordion-q">${escHtml(h.question)}</div><div class="accordion-a-preview">${escHtml(h.answer)}</div></div><span class="accordion-score" style="color:${color}">${cleanS.toFixed(1)}/10</span><span class="accordion-chevron" id="chev-${i}">▾</span></button><div class="accordion-body" id="acc-body-${i}"><div class="acc-detail glass-inner"><div class="acc-detail-label">Your Answer</div><div class="acc-detail-body">${escHtml(h.answer)}</div></div><div class="acc-detail glass-inner" style="border-color:${color}44;"><div class="acc-detail-label">AI Feedback</div><div class="acc-detail-body">${escHtml(h.feedback)}</div></div></div></div>`;
+    }).join("");
+  }
 }
 
 function toggleAccordion(idx) {
   const body = document.getElementById(`acc-body-${idx}`);
-  const chev = document.getElementById(`chev-${idx}`);
   const isOpen = body.classList.contains("open");
   body.classList.toggle("open", !isOpen);
-  chev.classList.toggle("open", !isOpen);
+  document.getElementById(`chev-${idx}`).classList.toggle("open", !isOpen);
 }
 
-// ─── RESTART ───
-function restartInterview() {
-  resetSession(false);
-  goPage("upload");
-}
-
-// ─── HELPERS ───
-function showError(id, msg) {
-  const el = document.getElementById(id);
-  if (el) { el.textContent = msg; el.style.display = "block"; }
-}
-function hideError(id) {
-  const el = document.getElementById(id);
-  if (el) el.style.display = "none";
-}
-function escHtml(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-function delay(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
+function restartInterview() { resetSession(false); goPage("upload"); }
+function showError(id, msg) { const el = document.getElementById(id); if(el) { el.textContent=msg; el.style.display="block"; } }
+function hideError(id) { const el = document.getElementById(id); if(el) el.style.display="none"; }
+function escHtml(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 </script>
 </body>
 </html>
