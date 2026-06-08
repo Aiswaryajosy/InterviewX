@@ -59,7 +59,7 @@ The application operates through a sequential pipeline, handling file parsing, d
 
 ## Technologies Used
 * **Backend Framework:** Python, Flask
-* **AI Integration:** Google GenAI SDK (Gemini 2.5 Flash)
+* **AI Integration:** Google GenAI SDK
 * **Data Processing:** PyPDF2
 * **Frontend:** HTML5, CSS3, JavaScript
 * **Deployment:** Render / Gunicorn
