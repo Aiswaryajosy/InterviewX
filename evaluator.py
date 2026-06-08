@@ -9,10 +9,8 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 # SDK automatically skips models that are unavailable
 MODELS = [
     "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
     "gemini-3.1-flash-lite",
-    "gemini-3-flash",
-    "gemini-3-flash-live",
+    "gemini-2.5-flash-lite"
 ]
 
 def call_gemini_json(prompt):
